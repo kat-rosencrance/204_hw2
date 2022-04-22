@@ -1,0 +1,192 @@
+---
+title: "204_hw2"
+author: "Katherine Rosencrance"
+date: "4/21/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# attach packages
+library(here)
+library(tidyverse)
+
+```
+
+# #1. Plot marginal abatement cost data for each irrigation district
+```{r}
+#Read in the data
+water_districts <- read_csv(here("Water_Districts.csv"))
+
+# plot data from each district
+district_plot <- ggplot(data = water_districts, aes(x= Reduction)) + 
+  geom_smooth(method = "lm", aes(y = MC_Kern), color = "darkred") + 
+  geom_smooth(method = "lm", aes(y = MC_Mojave), color="steelblue")+
+  geom_smooth(method = "lm", aes(y = MC_Antelope), color = "green")+
+  geom_smooth(method = "lm", aes(y = MC_Ventura), color = "yellow")+
+  labs(x = "Reduction in AF", y = "Price ($/AF) ")+
+  theme_classic()
+district_plot
+
+```
+
+```{r}
+# plot data for each district separately
+MC_kern <- ggplot(data = water_districts, aes(x = Reduction, y = MC_Kern))+
+  geom_point()
+MC_kern
+
+MC_mojave <- ggplot(data = water_districts, aes(x = Reduction, y = MC_Mojave))+
+  geom_point()
+MC_mojave
+
+MC_antelope <- ggplot(data = water_districts, aes(x = Reduction, y = MC_Antelope))+
+  geom_point()
+MC_antelope
+
+MC_ventura <- ggplot(data = water_districts, aes(x = Reduction, y = MC_Ventura))+
+  geom_point()
+MC_ventura
+```
+
+```{r}
+# linear models for each district
+model_kern <- lm(MC_Kern ~ 0 + Reduction, data= water_districts)
+B = model_kern$coefficient[1]
+predicted_mc_kern <- B*seq(0, 150, 500)
+
+model_mojave <- lm(MC_Mojave ~ 0 + Reduction, data= water_districts)
+B = model_mojave$coefficient[1]
+predicted_mc_mojave <- B*seq(0, 150, 500)
+
+model_antelope <- lm(MC_Antelope ~ 0 + Reduction, data= water_districts)
+B = model_antelope$coefficient[1]
+predicted_mc_antelope <- B*seq(0, 150, 500)
+
+model_ventura <- lm(MC_Ventura ~ 0 + Reduction, data= water_districts)
+B = model_ventura$coefficient[1]
+predicted_mc_ventura <- B*seq(0, 150, 500)
+
+summary(model_kern)
+summary(model_antelope)
+summary(model_mojave)
+summary(model_ventura)
+
+# store slopes
+kern_slope <- model_kern$coefficient[1]
+mojave_slope <- model_mojave$coefficient[1]
+antelope_slope <- model_antelope$coefficient[1]
+ventura_slope <- model_ventura$coefficient[1]
+```
+
+# #2.Derive each districts demand curve for water
+
+```{r}
+#Baselines
+kern_baseline <- 150
+mojave_baseline <- 140 
+antelope_baseline <- 220
+ventura_baseline <- 245
+
+# Demand/use equations stored as functions
+kern_mb <- function(x){kern_slope*(kern_baseline-x)}
+mojave_mb <- function(x){mojave_slope*(mojave_baseline-x)}
+antelope_mb <- function(x){antelope_slope*(antelope_baseline-x)}
+ventura_mb <- function(x){ventura_slope*(ventura_baseline-x)}
+
+# Plot demand curves
+ggplot(data.frame(x = c(0,250)), aes(x = x)) +
+  stat_function(fun = kern_mb, color = "darkred")+
+  stat_function(fun = mojave_mb, color = "steelblue")+
+  stat_function(fun = antelope_mb, color = "green")+
+  stat_function(fun = ventura_mb, color = "yellow")+
+  theme_minimal()+
+  ylim(0, 750) +
+  labs(x = "Water used (AF)", y = "Price ($/AF)", title = "Demand for Water")
+```
+# #3 (1) calculate the stringency of the policy (defined below for each intervention) required to achieve the 500 AF target, (2) calculate the total cost of meeting the target using that approach, (3) calculate the cost to each district, and (4) calculate the tax revenue generated
+
+## Cap without trade
+```{r}
+# stringency of policy = 255/755 or 0.338
+
+# Total cost of meeting target
+
+# P* using the new Q* based on abatement
+kern_p <- {kern_slope*(kern_baseline-99.3)}
+mojave_p <- {mojave_slope*(mojave_baseline-92.68)}
+antelope_p <- {antelope_slope*(antelope_baseline-145.64)}
+ventura_p <- {ventura_slope*(ventura_baseline-162.19)}
+
+kern_p
+mojave_p
+antelope_p
+ventura_p
+
+# calculate area of triangle using 1/2(P*)(change in Q) to get individual costs
+kern_cost <- 0.5*(kern_p)*(50.7)
+mojave_cost <- 0.5*(mojave_p)*(47.32)
+antelope_cost <- 0.5*(antelope_p)*(74.36)
+ventura_cost <- 0.5*(ventura_p)*(82.81)
+
+# total cost by adding up all district costs
+total_cost <- kern_cost +
+mojave_cost +
+antelope_cost +
+ventura_cost
+
+total_cost
+
+```
+
+## Tax on water use
+```{r}
+# stringency calculated by horizontally summing the 4 MC(A) curves
+horizontal_sum <- (1/kern_slope)+(1/mojave_slope)+(1/antelope_slope)+(1/ventura_slope)
+tau_star <- 255/horizontal_sum
+tau_star
+
+#calculate total cost by getting area of triangle from aggregate MC curve
+total_cost <- 0.5*tau_star*255
+total_cost
+
+#calculate individual cost for each district
+
+#determine abatement for each district
+kern_abate <- (1/kern_slope)*tau_star
+mojave_abate <- (1/mojave_slope)*tau_star
+antelope_abate <- (1/antelope_slope)*tau_star
+ventura_abate <- (1/ventura_slope)*tau_star
+
+kern_abate
+mojave_abate
+antelope_abate
+ventura_abate
+
+#determine area of triangle using abatement and tax (tau_star)
+kern_cost_tax <- 0.5*(kern_abate*tau_star)
+mojave_cost_tax <- 0.5*(mojave_abate*tau_star)
+antelope_cost_tax <- 0.5*(antelope_abate*tau_star)
+ventura_cost_tax <- 0.5*(ventura_abate*tau_star)
+
+kern_cost_tax
+mojave_cost_tax
+antelope_cost_tax
+ventura_cost_tax
+
+# determine tax revenue by multiplying tax by abatement
+government_revenue <- tau_star*255
+government_revenue
+
+```
+## Cap and trade
+```{r}
+# calculate stringency of policy
+
+# total cost of meeting approach
+
+# total cost to each district
+
+
+```
+
