@@ -181,12 +181,179 @@ government_revenue
 ```
 ## Cap and trade
 ```{r}
-# calculate stringency of policy
+# calculate stringency of policy= baseline-abatement/abatement
+kern_trade_abatement <- tau_star/kern_slope
+kern_stringency <- (kern_trade_abatement)/(kern_baseline)
+
+mojave_trade_abatement <- tau_star/mojave_slope
+mojave_stringency <- (mojave_trade_abatement)/(mojave_baseline)
+
+antelope_trade_abatement <- tau_star/antelope_slope
+antelope_stringency <- (antelope_trade_abatement)/(antelope_baseline)
+
+ventura_trade_abatement <- tau_star/ventura_slope
+ventura_stringency <- (ventura_trade_abatement)/(ventura_baseline)
+
+kern_stringency
+mojave_stringency
+antelope_stringency
+ventura_stringency
 
 # total cost of meeting approach
+#calculate total cost by getting area of triangle from aggregate MC curve
+total_cost <- 0.5*tau_star*255
+total_cost
 
 # total cost to each district
+kern_post_trade_cost <- (0.5*kern_abate*tau_star)
+kern_post_trade_cost
+mojave_post_trade_cost <- 0.5*mojave_abate*tau_star
+mojave_post_trade_cost
+antelope_post_trade_cost <- 0.5*antelope_abate*tau_star
+antelope_post_trade_cost
+ventura_post_trade_cost <- 0.5*ventura_abate*tau_star
+ventura_post_trade_cost
 
+#Take into account cost of AF sold or bought based on the difference in abatement before and after trading
+kern_trade_money <- (kern_trade_abatement-50.7)*(tau_star)
+kern_trade_money
+#Kern abated more than with the 1/3, so subtract amount made from selling from total cost
+kern_trade_cost <- kern_post_trade_cost-kern_trade_money
+kern_trade_cost
+
+mojave_trade_money <- (mojave_trade_abatement - 47.32)*(tau_star)
+mojave_trade_money
+#Mojave abated less than with the 1/3, so add amount spent from buying extra to total cost 
+mojave_trade_cost <- mojave_post_trade_cost+mojave_trade_money
+mojave_trade_cost
+
+antelope_trade_money <- (antelope_trade_abatement - 74.36)*tau_star
+antelope_trade_money
+#Antelope abated less than with the 1/3, so add amount spent from buying extra to total cost
+antelope_trade_cost <- antelope_post_trade_cost+antelope_trade_money
+antelope_trade_cost
+
+ventura_trade_money <- (ventura_trade_abatement - 82.81)*tau_star
+ventura_trade_money
+#Ventura abated more than with the 1/3, so subtract amount made from selling from total cost
+ventura_trade_cost <- ventura_post_trade_cost - ventura_trade_money
+ventura_trade_cost
 
 ```
+
+#A severe drought hits California, and it is necessary to reduce water use from 500 AF down to 300 AF. Your job is to estimate the cost of the drought (i.e., the cost of reducing water use from 500 AF to 300 AF) to each irrigation district under each policy. Considering the entire jump from status quo (755 AF) to the drought (300 AF), which policy is preferred by each irrigation district? How does your answer depend on how rights are allocated to each district (in policies (a) and (c))2?
+
+## Cap without trade
+```{r}
+# stringency = 455/755 = 0.602
+# baseline*0.602 = abatement
+# P* using the new Q* based on abatement
+kern_p_drought <- {kern_slope*(kern_baseline-59.7)}
+mojave_p_drought <- {mojave_slope*(mojave_baseline-55.72)}
+antelope_p_drought <- {antelope_slope*(antelope_baseline-87.56)}
+ventura_p_drought <- {ventura_slope*(ventura_baseline-97.51)}
+
+kern_p_drought
+mojave_p_drought
+antelope_p_drought
+ventura_p_drought
+
+# calculate area of triangle using 1/2(P*)(change in Q) to get individual costs
+kern_cost_drought <- 0.5*(kern_p_drought)*(59.7)
+mojave_cost_drought <- 0.5*(mojave_p_drought)*(84.28)
+antelope_cost_drought <- 0.5*(antelope_p_drought)*(132.44)
+ventura_cost_drought <- 0.5*(ventura_p_drought)*(147.49)
+
+kern_cost_drought
+mojave_cost_drought
+antelope_cost_drought
+ventura_cost_drought
+```
+# Tax on water use
+```{r}
+# stringency calculated by horizontally summing the 4 MC(A) curves
+horizontal_sum <- (1/kern_slope)+(1/mojave_slope)+(1/antelope_slope)+(1/ventura_slope)
+tau_star_drought <- 455/horizontal_sum
+tau_star_drought
+
+#calculate individual cost for each district
+
+#determine abatement for each district
+kern_abate_drought <- (1/kern_slope)*tau_star_drought
+mojave_abate_drought <- (1/mojave_slope)*tau_star_drought
+antelope_abate_drought <- (1/antelope_slope)*tau_star_drought
+ventura_abate_drought <- (1/ventura_slope)*tau_star_drought
+
+kern_abate_drought
+mojave_abate_drought
+antelope_abate_drought
+ventura_abate_drought
+
+#determine area of triangle using abatement and tax (tau_star_drought)
+kern_cost_tax_drought <- 0.5*(kern_abate_drought*tau_star_drought)
+mojave_cost_tax_drought <- 0.5*(mojave_abate_drought*tau_star_drought)
+antelope_cost_tax_drought <- 0.5*(antelope_abate_drought*tau_star_drought)
+ventura_cost_tax_drought <- 0.5*(ventura_abate_drought*tau_star_drought)
+
+kern_cost_tax_drought
+mojave_cost_tax_drought
+antelope_cost_tax_drought
+ventura_cost_tax_drought
+```
+# Cap and Trade
+```{r}
+# calculate stringency of policy= baseline-abatement/abatement
+kern_trade_abatement_d <- tau_star_drought/kern_slope
+kern_stringency_d <- (kern_trade_abatement_d)/(kern_baseline)
+
+mojave_trade_abatement_d <- tau_star_drought/mojave_slope
+mojave_stringency_d <- (mojave_trade_abatement_d)/(mojave_baseline)
+
+antelope_trade_abatement_d <- tau_star_drought/antelope_slope
+antelope_stringency_d <- (antelope_trade_abatement_d)/(antelope_baseline)
+
+ventura_trade_abatement_d <- tau_star_drought/ventura_slope
+ventura_stringency_d <- (ventura_trade_abatement_d)/(ventura_baseline)
+
+kern_stringency_d
+mojave_stringency_d
+antelope_stringency_d
+ventura_stringency_d
+
+# total cost to each district
+kern_post_trade_cost_d <- (0.5*kern_abate_drought*tau_star_drought)
+kern_post_trade_cost_d
+mojave_post_trade_cost_d <- 0.5*mojave_abate_drought*tau_star_drought
+mojave_post_trade_cost_d
+antelope_post_trade_cost_d <- 0.5*antelope_abate_drought*tau_star_drought
+antelope_post_trade_cost_d
+ventura_post_trade_cost_d <- 0.5*ventura_abate_drought*tau_star_drought
+ventura_post_trade_cost_d
+
+#Take into account cost of AF sold or bought based on the difference in abatement before and after trading
+kern_trade_money_d <- (kern_trade_abatement_d-59.7)*(tau_star_drought)
+kern_trade_money_d
+#Kern abated more than with the 1/3, so subtract amount made from selling from total cost
+kern_trade_cost_d <- kern_post_trade_cost_d-kern_trade_money_d
+kern_trade_cost_d
+
+mojave_trade_money_d <- (mojave_trade_abatement_d - 84.28)*(tau_star_drought)
+mojave_trade_money_d
+#Mojave abated less than with the 1/3, so add amount spent from buying extra to total cost 
+mojave_trade_cost_d <- mojave_post_trade_cost_d+mojave_trade_money_d
+mojave_trade_cost_d
+
+antelope_trade_money_d <- (antelope_trade_abatement_d - 132.44)*tau_star_drought
+antelope_trade_money_d
+#Antelope abated less than with the 1/3, so add amount spent from buying extra to total cost
+antelope_trade_cost_d <- antelope_post_trade_cost_d+antelope_trade_money_d
+antelope_trade_cost_d
+
+ventura_trade_money_d <- (ventura_trade_abatement_d - 147.49)*tau_star_drought
+ventura_trade_money_d
+#Ventura abated more than with the 1/3, so subtract amount made from selling from total cost
+ventura_trade_cost_d <- ventura_post_trade_cost_d - ventura_trade_money_d
+ventura_trade_cost_d
+```
+
 
